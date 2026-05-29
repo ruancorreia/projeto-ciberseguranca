@@ -114,8 +114,8 @@ limpeza, engenharia de atributos, KPIs, visualizações, interpretação e concl
 
 Após publicar o projeto, atualize os links abaixo:
 
-- GitHub: `<link do repositório>`
-- GitHub Pages: `<link da página inicial>`
+- GitHub: [https://github.com/ruancorreia/projeto-ciberseguranca](https://github.com/ruancorreia/projeto-ciberseguranca)
+- GitHub Pages: [https://ruancorreia.github.io/projeto-ciberseguranca/](https://ruancorreia.github.io/projeto-ciberseguranca/)
 - Streamlit Cloud: `<link do dashboard>`
 
 ## Tecnologias
