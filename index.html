@@ -170,6 +170,20 @@
         margin: 18px 0;
       }
 
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        margin-top: 6px;
+      }
+
+      .chart-fallback {
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        text-align: center;
+      }
+
       table {
         width: 100%;
         border-collapse: collapse;
@@ -238,6 +252,7 @@
           2015 e 2024, com foco em tipos de ataque, setores afetados, impacto
           financeiro, vulnerabilidades, criticidade e tempo de recuperação.
         </p>
+        <div class="note status" id="load-status">Carregando dados do CSV...</div>
 
         <h2>Visão geral</h2>
         <section class="kpis" id="kpis"></section>
@@ -316,11 +331,28 @@
 
       let rows = [];
 
+      function setStatus(message, isError = false) {
+        const status = document.getElementById("load-status");
+        status.textContent = message;
+        status.style.borderColor = isError ? "#f87171" : "#24466e";
+        status.style.color = isError ? "#fecaca" : "#dbeafe";
+      }
+
+      function showChartFallback(message) {
+        document.querySelectorAll(".chart").forEach((chart) => {
+          chart.classList.add("chart-fallback");
+          chart.textContent = message;
+        });
+      }
+
       function parseCSV(text) {
-        const lines = text.trim().split(/\r?\n/);
-        const headers = lines.shift().split(",");
+        const lines = text.trim().split(/\r?\n/).filter(Boolean);
+        const headers = lines.shift().split(",").map((header) => header.trim());
+        if (!headers.includes("ano") || !headers.includes("incidentes")) {
+          throw new Error("o CSV não possui as colunas esperadas");
+        }
         return lines.map((line) => {
-          const values = line.split(",");
+          const values = line.split(",").map((value) => value.trim());
           const row = Object.fromEntries(headers.map((h, i) => [h, values[i]]));
           ["ano", "mes", "incidentes", "sistemas_afetados"].forEach(
             (key) => (row[key] = Number(row[key]))
@@ -433,6 +465,20 @@
       }
 
       function renderCharts(data) {
+        if (!window.Plotly) {
+          showChartFallback(
+            "A biblioteca de gráficos não carregou neste navegador. Atualize a página ou verifique bloqueios de rede para cdn.plot.ly."
+          );
+          setStatus(
+            "Dados carregados, mas os gráficos não puderam ser exibidos porque o Plotly não carregou.",
+            true
+          );
+          return;
+        }
+        document.querySelectorAll(".chart").forEach((chart) => {
+          chart.classList.remove("chart-fallback");
+          chart.textContent = "";
+        });
         const timeline = groupTimeline(data);
         Plotly.newPlot(
           "timeline",
@@ -545,19 +591,46 @@
 
       function render() {
         const data = filteredRows();
-        if (!data.length) return;
+        if (!data.length) {
+          document.getElementById("kpis").innerHTML = "";
+          document.getElementById("table").innerHTML = "";
+          document.getElementById("interpretation").textContent =
+            "Nenhum registro encontrado para o recorte selecionado.";
+          document.getElementById("conclusion").textContent =
+            "Ajuste os filtros para visualizar os indicadores e gráficos.";
+          showChartFallback("Sem dados para o recorte selecionado.");
+          return;
+        }
         renderKpis(data);
         renderCharts(data);
         renderTable(data);
         renderText(data);
       }
 
-      fetch("dados/simulacao_ciberseguranca_brasil.csv")
-        .then((response) => response.text())
+      window.addEventListener("error", (event) => {
+        setStatus(`Erro ao carregar a página: ${event.message}`, true);
+      });
+
+      fetch("dados/simulacao_ciberseguranca_brasil.csv?v=20260528", {
+        cache: "no-store",
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`CSV não encontrado (${response.status})`);
+          }
+          return response.text();
+        })
         .then((csv) => {
           rows = parseCSV(csv);
           buildFilters();
           render();
+          if (window.Plotly) {
+            setStatus(`Dados carregados: ${formatInteger(rows.length)} registros do CSV.`);
+          }
+        })
+        .catch((error) => {
+          setStatus(`Erro ao carregar dados: ${error.message}`, true);
+          showChartFallback("Não foi possível carregar os dados do CSV.");
         });
     </script>
   </body>
