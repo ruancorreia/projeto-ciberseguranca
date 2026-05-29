@@ -3,17 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Analise de Seguranca Cibernetica</title>
+    <title>Análise de Segurança Cibernética</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <style>
       :root {
-        color-scheme: light;
-        --bg: #f6f8fb;
-        --panel: #ffffff;
-        --text: #162033;
-        --muted: #607089;
-        --accent: #0f766e;
-        --accent-2: #b42318;
-        --line: #d8e0ea;
+        color-scheme: dark;
+        --bg: #0f172a;
+        --sidebar: #020617;
+        --panel: #111827;
+        --panel-2: #172033;
+        --line: #334155;
+        --text: #f8fafc;
+        --muted: #cbd5e1;
+        --soft: #94a3b8;
+        --accent: #2dd4bf;
+        --accent-2: #60a5fa;
       }
 
       * {
@@ -25,148 +29,536 @@
         font-family: Arial, Helvetica, sans-serif;
         background: var(--bg);
         color: var(--text);
-        line-height: 1.55;
       }
 
-      header {
-        background: #111827;
-        color: #fff;
-        padding: 56px 24px 44px;
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 300px minmax(0, 1fr);
       }
 
-      .wrap {
-        width: min(1080px, calc(100% - 32px));
-        margin: 0 auto;
+      aside {
+        background: var(--sidebar);
+        border-right: 1px solid #1e293b;
+        padding: 24px 20px;
+        overflow-y: auto;
+        max-height: 100vh;
+        position: sticky;
+        top: 0;
+      }
+
+      main {
+        padding: 52px clamp(24px, 5vw, 80px);
       }
 
       h1 {
-        margin: 0 0 12px;
-        font-size: clamp(2rem, 5vw, 4rem);
+        margin: 0 0 14px;
+        font-size: clamp(2.4rem, 5vw, 4.1rem);
         line-height: 1.05;
         letter-spacing: 0;
       }
 
       h2 {
-        margin: 0 0 16px;
-        font-size: 1.5rem;
+        margin: 34px 0 18px;
+        font-size: 1.55rem;
+      }
+
+      h3 {
+        margin: 0 0 12px;
+        font-size: 1.05rem;
       }
 
       p {
-        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
       }
 
-      header p {
-        max-width: 760px;
-        color: #d8dee9;
-        font-size: 1.08rem;
+      a {
+        color: var(--accent);
       }
 
-      main {
-        padding: 28px 0 56px;
+      .subtitle {
+        max-width: 1120px;
       }
 
-      section {
-        margin-top: 28px;
-        padding: 28px;
-        background: var(--panel);
+      .filter {
+        margin: 20px 0;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        color: var(--text);
+      }
+
+      select {
+        width: 100%;
+        min-height: 92px;
         border: 1px solid var(--line);
         border-radius: 8px;
+        background: var(--panel);
+        color: var(--text);
+        padding: 8px;
+        outline: none;
       }
 
-      .grid {
+      select:focus {
+        border-color: var(--accent);
+      }
+
+      option {
+        padding: 4px 6px;
+      }
+
+      .hint {
+        color: var(--soft);
+        font-size: 0.9rem;
+        margin-bottom: 24px;
+      }
+
+      .kpis {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 16px;
       }
 
-      .item {
-        padding: 18px;
+      .card {
+        background: var(--panel);
         border: 1px solid var(--line);
         border-radius: 8px;
-        min-height: 112px;
+        padding: 18px;
+        min-height: 106px;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
       }
 
-      .item strong {
+      .card span {
         display: block;
-        margin-bottom: 8px;
-        color: var(--accent);
+        color: var(--muted);
+        font-size: 0.88rem;
+        margin-bottom: 10px;
       }
 
-      ul {
-        margin: 0;
-        padding-left: 20px;
+      .card strong {
+        display: block;
+        color: var(--text);
+        font-size: clamp(1.65rem, 3vw, 2.25rem);
+        font-weight: 500;
+        line-height: 1.1;
       }
 
-      a {
-        color: var(--accent);
-        font-weight: 700;
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .chart {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        min-height: 420px;
       }
 
       .note {
-        border-left: 4px solid var(--accent-2);
+        background: #13233d;
+        border: 1px solid #24466e;
+        color: #dbeafe;
+        border-radius: 8px;
+        padding: 16px 18px;
+        margin: 18px 0;
       }
 
-      @media (max-width: 760px) {
-        .grid {
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      th,
+      td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #1f2d44;
+        text-align: left;
+        color: var(--muted);
+      }
+
+      th {
+        color: var(--text);
+        background: var(--panel-2);
+      }
+
+      .footer {
+        margin-top: 36px;
+        color: var(--soft);
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 980px) {
+        .app {
           grid-template-columns: 1fr;
         }
 
-        section {
-          padding: 22px;
+        aside {
+          position: static;
+          max-height: none;
+        }
+
+        .kpis,
+        .grid-2 {
+          grid-template-columns: 1fr;
         }
       }
     </style>
   </head>
   <body>
-    <header>
-      <div class="wrap">
-        <h1>Analise de Seguranca Cibernetica</h1>
+    <div class="app">
+      <aside>
+        <h3>Filtros</h3>
+        <p class="hint">Use Ctrl ou Shift para selecionar mais de uma opção.</p>
+        <div id="filters"></div>
+      </aside>
+
+      <main>
+        <h1>Análise de Segurança Cibernética e Ataques Digitais</h1>
         <p>
-          Projeto G2 sobre ataques digitais no Brasil, com dashboard interativo
-          em Streamlit, analise em notebook e visualizacoes com Plotly.
+          Dashboard interativo baseado no arquivo
+          <a
+            href="https://github.com/AlexandreLouzada/Dados-Simulados-G2/blob/main/datasets_g2_30_temas/simulacao_ciberseguranca_brasil.csv"
+            target="_blank"
+            >simulacao_ciberseguranca_brasil.csv</a
+          >.
         </p>
-      </div>
-    </header>
-
-    <main class="wrap">
-      <section>
-        <h2>Sobre o projeto</h2>
-        <p>
-          A proposta investiga incidentes ciberneticos entre 2015 e 2024,
-          avaliando tipos de ataque, setores atingidos, regioes criticas,
-          vulnerabilidades, impacto financeiro e tempo de recuperacao.
+        <p class="subtitle">
+          Este painel investiga incidentes de segurança digital no Brasil entre
+          2015 e 2024, com foco em tipos de ataque, setores afetados, impacto
+          financeiro, vulnerabilidades, criticidade e tempo de recuperação.
         </p>
-      </section>
 
-      <section>
-        <h2>Indicadores e analises</h2>
-        <div class="grid">
-          <div class="item">
-            <strong>KPIs</strong>
-            Total de incidentes, ataque predominante, setor mais afetado,
-            impacto financeiro, tempo medio e regiao critica.
-          </div>
-          <div class="item">
-            <strong>Visualizacoes</strong>
-            Serie temporal, barras, heatmap mensal, dispersao, ranking de
-            vulnerabilidades e tabela dinamica.
-          </div>
-          <div class="item">
-            <strong>Filtros</strong>
-            Ano, mes, regiao, estado, setor, tipo de ataque e nivel de
-            criticidade.
-          </div>
-        </div>
-      </section>
+        <h2>Visão geral</h2>
+        <section class="kpis" id="kpis"></section>
 
-      <section class="note">
-        <h2>Como executar</h2>
-        <ul>
-          <li>Instale as dependencias com <code>pip install -r requirements.txt</code>.</li>
-          <li>Abra o dashboard com <code>streamlit run app.py</code>.</li>
-          <li>Use o notebook para revisar a analise exploratoria.</li>
-        </ul>
-      </section>
-    </main>
+        <h2>Evolução temporal</h2>
+        <div class="chart" id="timeline"></div>
+        <div class="note" id="critical-period"></div>
+        <div class="chart" id="heatmap"></div>
+
+        <h2>Ataques, setores e regiões</h2>
+        <section class="grid-2">
+          <div class="chart" id="attack-bar"></div>
+          <div class="chart" id="sector-bar"></div>
+          <div class="chart" id="region-pie"></div>
+          <div class="chart" id="vulnerability-bar"></div>
+        </section>
+
+        <h2>Risco e impacto</h2>
+        <section class="grid-2">
+          <div class="chart" id="criticality-bar"></div>
+          <div class="chart" id="status-pie"></div>
+        </section>
+        <div class="chart" id="scatter"></div>
+
+        <h2>Tabela dinâmica</h2>
+        <div id="table"></div>
+
+        <h2>Interpretação dos resultados</h2>
+        <p id="interpretation"></p>
+
+        <h2>Conclusão executiva</h2>
+        <p id="conclusion"></p>
+
+        <p class="footer">
+          Projeto Final da Disciplina | Unilasalle - Sistemas de Informação |
+          Ruan da Silva Correia
+        </p>
+      </main>
+    </div>
+
+    <script>
+      const MONTHS = {
+        1: "Janeiro",
+        2: "Fevereiro",
+        3: "Março",
+        4: "Abril",
+        5: "Maio",
+        6: "Junho",
+        7: "Julho",
+        8: "Agosto",
+        9: "Setembro",
+        10: "Outubro",
+        11: "Novembro",
+        12: "Dezembro",
+      };
+      const FILTERS = [
+        ["ano", "Ano"],
+        ["mes", "Mês"],
+        ["regiao", "Região"],
+        ["uf", "Estado (UF)"],
+        ["setor", "Setor"],
+        ["tipo_ataque", "Tipo de ataque"],
+        ["nivel_criticidade", "Nível de criticidade"],
+      ];
+      const COLORS = ["#2dd4bf", "#60a5fa", "#fb7185", "#c084fc", "#facc15", "#94a3b8"];
+      const plotLayout = {
+        paper_bgcolor: "#111827",
+        plot_bgcolor: "#111827",
+        font: { color: "#e5e7eb", family: "Arial" },
+        margin: { l: 50, r: 25, t: 55, b: 50 },
+        colorway: COLORS,
+        xaxis: { gridcolor: "#334155" },
+        yaxis: { gridcolor: "#334155" },
+      };
+      const config = { responsive: true, displayModeBar: false };
+
+      let rows = [];
+
+      function parseCSV(text) {
+        const lines = text.trim().split(/\r?\n/);
+        const headers = lines.shift().split(",");
+        return lines.map((line) => {
+          const values = line.split(",");
+          const row = Object.fromEntries(headers.map((h, i) => [h, values[i]]));
+          ["ano", "mes", "incidentes", "sistemas_afetados"].forEach(
+            (key) => (row[key] = Number(row[key]))
+          );
+          ["impacto_financeiro", "tempo_recuperacao"].forEach(
+            (key) => (row[key] = Number(row[key]))
+          );
+          row.periodo = `${row.ano}-${String(row.mes).padStart(2, "0")}`;
+          return row;
+        });
+      }
+
+      function formatInteger(value) {
+        return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(value);
+      }
+
+      function formatCurrency(value) {
+        return new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(value);
+      }
+
+      function formatHours(value) {
+        return `${new Intl.NumberFormat("pt-BR", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        }).format(value)} h`;
+      }
+
+      function unique(column) {
+        return [...new Set(rows.map((row) => row[column]))].sort((a, b) =>
+          a > b ? 1 : -1
+        );
+      }
+
+      function labelFor(column, value) {
+        if (column === "mes") return MONTHS[value];
+        return String(value);
+      }
+
+      function buildFilters() {
+        const container = document.getElementById("filters");
+        container.innerHTML = FILTERS.map(([column, label]) => {
+          const options = unique(column)
+            .map(
+              (value) =>
+                `<option value="${value}" selected>${labelFor(column, value)}</option>`
+            )
+            .join("");
+          return `<div class="filter"><label>${label}</label><select id="filter-${column}" multiple>${options}</select></div>`;
+        }).join("");
+        FILTERS.forEach(([column]) => {
+          document.getElementById(`filter-${column}`).addEventListener("change", render);
+        });
+      }
+
+      function selected(column) {
+        return [...document.getElementById(`filter-${column}`).selectedOptions].map((o) =>
+          column === "ano" || column === "mes" ? Number(o.value) : o.value
+        );
+      }
+
+      function filteredRows() {
+        return rows.filter((row) =>
+          FILTERS.every(([column]) => selected(column).includes(row[column]))
+        );
+      }
+
+      function groupSum(data, column, valueColumn = "incidentes") {
+        const map = new Map();
+        data.forEach((row) => {
+          map.set(row[column], (map.get(row[column]) || 0) + row[valueColumn]);
+        });
+        return [...map.entries()]
+          .map(([key, value]) => ({ key, value }))
+          .sort((a, b) => b.value - a.value);
+      }
+
+      function groupTimeline(data) {
+        const map = new Map();
+        data.forEach((row) => {
+          map.set(row.periodo, (map.get(row.periodo) || 0) + row.incidentes);
+        });
+        return [...map.entries()]
+          .map(([periodo, incidentes]) => ({ periodo, incidentes }))
+          .sort((a, b) => a.periodo.localeCompare(b.periodo));
+      }
+
+      function top(data, column) {
+        return groupSum(data, column)[0] || { key: "-", value: 0 };
+      }
+
+      function renderKpis(data) {
+        const totalIncidents = data.reduce((sum, row) => sum + row.incidentes, 0);
+        const totalImpact = data.reduce((sum, row) => sum + row.impacto_financeiro, 0);
+        const averageRecovery =
+          data.reduce((sum, row) => sum + row.tempo_recuperacao, 0) / data.length;
+        const cards = [
+          ["Total de incidentes", formatInteger(totalIncidents)],
+          ["Impacto financeiro total", formatCurrency(totalImpact)],
+          ["Tempo médio de recuperação", formatHours(averageRecovery)],
+          ["Ataque predominante", top(data, "tipo_ataque").key],
+          ["Setor mais afetado", top(data, "setor").key],
+          ["Região mais crítica", top(data, "regiao").key],
+        ];
+        document.getElementById("kpis").innerHTML = cards
+          .map(([label, value]) => `<article class="card"><span>${label}</span><strong>${value}</strong></article>`)
+          .join("");
+      }
+
+      function renderCharts(data) {
+        const timeline = groupTimeline(data);
+        Plotly.newPlot(
+          "timeline",
+          [{ x: timeline.map((d) => d.periodo), y: timeline.map((d) => d.incidentes), type: "scatter", mode: "lines+markers", line: { color: COLORS[0] } }],
+          { ...plotLayout, title: "Evolução temporal dos incidentes" },
+          config
+        );
+
+        const critical = [...timeline].sort((a, b) => b.incidentes - a.incidentes)[0];
+        document.getElementById("critical-period").textContent = critical
+          ? `Período crítico: ${critical.periodo} registrou ${formatInteger(critical.incidentes)} incidentes no recorte selecionado.`
+          : "Nenhum período disponível para o recorte selecionado.";
+
+        const years = unique("ano");
+        const months = Object.keys(MONTHS).map(Number);
+        const heatValues = years.map((year) =>
+          months.map((month) =>
+            data
+              .filter((row) => row.ano === year && row.mes === month)
+              .reduce((sum, row) => sum + row.incidentes, 0)
+          )
+        );
+        Plotly.newPlot(
+          "heatmap",
+          [{ z: heatValues, x: months.map((m) => MONTHS[m]), y: years, type: "heatmap", colorscale: "Reds" }],
+          { ...plotLayout, title: "Heatmap mensal de incidentes" },
+          config
+        );
+
+        renderBar("attack-bar", data, "tipo_ataque", "Frequência por tipo de ataque");
+        renderBar("sector-bar", data, "setor", "Comparação entre setores");
+        renderBar("vulnerability-bar", data, "vulnerabilidade", "Ranking de vulnerabilidades");
+        renderBar("criticality-bar", data, "nivel_criticidade", "Incidentes por criticidade");
+        renderPie("region-pie", data, "regiao", "Distribuição regional dos incidentes");
+        renderPie("status-pie", data, "status_resposta", "Status de resposta");
+        renderScatter(data);
+      }
+
+      function renderBar(id, data, column, title) {
+        const grouped = groupSum(data, column).reverse();
+        Plotly.newPlot(
+          id,
+          [{ x: grouped.map((d) => d.value), y: grouped.map((d) => d.key), type: "bar", orientation: "h", marker: { color: COLORS[0] } }],
+          { ...plotLayout, title },
+          config
+        );
+      }
+
+      function renderPie(id, data, column, title) {
+        const grouped = groupSum(data, column);
+        Plotly.newPlot(
+          id,
+          [{ labels: grouped.map((d) => d.key), values: grouped.map((d) => d.value), type: "pie", marker: { colors: COLORS } }],
+          { ...plotLayout, title },
+          config
+        );
+      }
+
+      function renderScatter(data) {
+        const grouped = new Map();
+        data.forEach((row) => {
+          const key = `${row.ano}|${row.mes}|${row.regiao}|${row.setor}|${row.tipo_ataque}`;
+          if (!grouped.has(key)) {
+            grouped.set(key, { incidentes: 0, impacto: 0, tipo: row.tipo_ataque, label: `${row.periodo} - ${row.regiao} - ${row.setor}` });
+          }
+          const item = grouped.get(key);
+          item.incidentes += row.incidentes;
+          item.impacto += row.impacto_financeiro;
+        });
+        const points = [...grouped.values()];
+        Plotly.newPlot(
+          "scatter",
+          [{ x: points.map((p) => p.incidentes), y: points.map((p) => p.impacto), text: points.map((p) => p.label), mode: "markers", type: "scatter", marker: { size: 10, color: COLORS[1] } }],
+          { ...plotLayout, title: "Impacto financeiro x incidentes", xaxis: { title: "Incidentes", gridcolor: "#334155" }, yaxis: { title: "Impacto financeiro", gridcolor: "#334155" } },
+          config
+        );
+      }
+
+      function renderTable(data) {
+        const grouped = new Map();
+        data.forEach((row) => {
+          const key = `${row.regiao}|${row.uf}|${row.setor}|${row.tipo_ataque}`;
+          if (!grouped.has(key)) {
+            grouped.set(key, { regiao: row.regiao, uf: row.uf, setor: row.setor, ataque: row.tipo_ataque, incidentes: 0, impacto: 0 });
+          }
+          const item = grouped.get(key);
+          item.incidentes += row.incidentes;
+          item.impacto += row.impacto_financeiro;
+        });
+        const rowsHtml = [...grouped.values()]
+          .sort((a, b) => b.incidentes - a.incidentes)
+          .slice(0, 20)
+          .map((row) => `<tr><td>${row.regiao}</td><td>${row.uf}</td><td>${row.setor}</td><td>${row.ataque}</td><td>${formatInteger(row.incidentes)}</td><td>${formatCurrency(row.impacto)}</td></tr>`)
+          .join("");
+        document.getElementById("table").innerHTML = `<table><thead><tr><th>Região</th><th>UF</th><th>Setor</th><th>Tipo de ataque</th><th>Incidentes</th><th>Impacto</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
+      }
+
+      function renderText(data) {
+        const total = data.reduce((sum, row) => sum + row.incidentes, 0);
+        const impact = data.reduce((sum, row) => sum + row.impacto_financeiro, 0);
+        const attack = top(data, "tipo_ataque");
+        const sector = top(data, "setor");
+        const region = top(data, "regiao");
+        const vulnerability = top(data, "vulnerabilidade");
+        document.getElementById("interpretation").textContent =
+          `O recorte analisado reúne ${formatInteger(total)} incidentes e impacto estimado de ${formatCurrency(impact)}. O ataque mais recorrente é ${attack.key}, o setor mais afetado é ${sector.key}, e a região com maior concentração é ${region.key}. A vulnerabilidade mais recorrente é ${vulnerability.key}, indicando prioridade para ações preventivas e melhoria dos controles de segurança.`;
+        document.getElementById("conclusion").textContent =
+          `A análise indica que a gestão de riscos deve combinar monitoramento temporal, priorização de vulnerabilidades e resposta direcionada aos setores e regiões mais afetados. O painel permite acompanhar padrões de ameaça, identificar períodos críticos e apoiar decisões para reduzir impacto financeiro, tempo de recuperação e exposição a incidentes.`;
+      }
+
+      function render() {
+        const data = filteredRows();
+        if (!data.length) return;
+        renderKpis(data);
+        renderCharts(data);
+        renderTable(data);
+        renderText(data);
+      }
+
+      fetch("dados/simulacao_ciberseguranca_brasil.csv")
+        .then((response) => response.text())
+        .then((csv) => {
+          rows = parseCSV(csv);
+          buildFilters();
+          render();
+        });
+    </script>
   </body>
 </html>
