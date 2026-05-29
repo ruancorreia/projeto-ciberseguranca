@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Analise de Seguranca Cibernetica</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --panel: #ffffff;
+        --text: #162033;
+        --muted: #607089;
+        --accent: #0f766e;
+        --accent-2: #b42318;
+        --line: #d8e0ea;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.55;
+      }
+
+      header {
+        background: #111827;
+        color: #fff;
+        padding: 56px 24px 44px;
+      }
+
+      .wrap {
+        width: min(1080px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(2rem, 5vw, 4rem);
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        margin: 0 0 16px;
+        font-size: 1.5rem;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      header p {
+        max-width: 760px;
+        color: #d8dee9;
+        font-size: 1.08rem;
+      }
+
+      main {
+        padding: 28px 0 56px;
+      }
+
+      section {
+        margin-top: 28px;
+        padding: 28px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .item {
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        min-height: 112px;
+      }
+
+      .item strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--accent);
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      a {
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      .note {
+        border-left: 4px solid var(--accent-2);
+      }
+
+      @media (max-width: 760px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        section {
+          padding: 22px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap">
+        <h1>Analise de Seguranca Cibernetica</h1>
+        <p>
+          Projeto G2 sobre ataques digitais no Brasil, com dashboard interativo
+          em Streamlit, analise em notebook e visualizacoes com Plotly.
+        </p>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section>
+        <h2>Sobre o projeto</h2>
+        <p>
+          A proposta investiga incidentes ciberneticos entre 2015 e 2024,
+          avaliando tipos de ataque, setores atingidos, regioes criticas,
+          vulnerabilidades, impacto financeiro e tempo de recuperacao.
+        </p>
+      </section>
+
+      <section>
+        <h2>Indicadores e analises</h2>
+        <div class="grid">
+          <div class="item">
+            <strong>KPIs</strong>
+            Total de incidentes, ataque predominante, setor mais afetado,
+            impacto financeiro, tempo medio e regiao critica.
+          </div>
+          <div class="item">
+            <strong>Visualizacoes</strong>
+            Serie temporal, barras, heatmap mensal, dispersao, ranking de
+            vulnerabilidades e tabela dinamica.
+          </div>
+          <div class="item">
+            <strong>Filtros</strong>
+            Ano, mes, regiao, estado, setor, tipo de ataque e nivel de
+            criticidade.
+          </div>
+        </div>
+      </section>
+
+      <section class="note">
+        <h2>Como executar</h2>
+        <ul>
+          <li>Instale as dependencias com <code>pip install -r requirements.txt</code>.</li>
+          <li>Abra o dashboard com <code>streamlit run app.py</code>.</li>
+          <li>Use o notebook para revisar a analise exploratoria.</li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>
