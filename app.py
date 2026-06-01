@@ -1052,9 +1052,9 @@ def render_back_home_button():
         <style>
         .back-home-link {
             position: fixed;
-            left: 18px;
+            left: 338px;
             bottom: 18px;
-            z-index: 9999;
+            z-index: 2147483647;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -1074,6 +1074,12 @@ def render_back_home_button():
             border-color: #5eead4;
             color: #02111b !important;
             text-decoration: none !important;
+        }
+
+        @media (max-width: 900px) {
+            .back-home-link {
+                left: 18px;
+            }
         }
         </style>
         <a class="back-home-link" href="?page=home" target="_self">Voltar para início</a>
