@@ -159,6 +159,7 @@ def configure_theme(dark_mode: bool) -> dict:
 
             [data-testid="stSidebarContent"] {
                 background: #020617;
+                padding-top: 0.35rem;
             }
 
             [data-testid="stSidebarCollapseButton"] {
@@ -1046,20 +1047,18 @@ def handle_navigation_query():
         st.query_params.clear()
 
 
-def render_back_home_button():
-    st.markdown(
+def render_sidebar_home_button():
+    st.sidebar.markdown(
         """
         <style>
-        .back-home-link {
-            position: fixed;
-            left: 338px;
-            bottom: 18px;
-            z-index: 2147483647;
+        .sidebar-home-link {
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            width: 100%;
             min-height: 48px;
             padding: 0 18px;
+            margin: 10px 0 24px;
             border-radius: 8px;
             border: 1px solid #2dd4bf;
             background: #0f766e;
@@ -1069,20 +1068,15 @@ def render_back_home_button():
             box-shadow: 0 16px 36px rgba(15, 118, 110, 0.28);
         }
 
-        .back-home-link:hover {
+        .sidebar-home-link:hover {
             background: #14b8a6;
             border-color: #5eead4;
             color: #02111b !important;
             text-decoration: none !important;
         }
 
-        @media (max-width: 900px) {
-            .back-home-link {
-                left: 18px;
-            }
-        }
         </style>
-        <a class="back-home-link" href="?page=home" target="_self">Voltar para início</a>
+        <a class="sidebar-home-link" href="?page=home" target="_self">Voltar para início</a>
         """,
         unsafe_allow_html=True,
     )
@@ -1095,10 +1089,10 @@ if not st.session_state.get("show_dashboard", False):
     st.stop()
 
 
-render_back_home_button()
 df = load_data()
 dark_mode = st.sidebar.toggle("Modo escuro", value=True)
 theme = configure_theme(dark_mode)
+render_sidebar_home_button()
 selected_filters = sidebar_filters(df)
 filtered = apply_filters(df, selected_filters)
 
