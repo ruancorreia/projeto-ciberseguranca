@@ -1,5 +1,6 @@
 from pathlib import Path
 from html import escape
+from textwrap import dedent
 import time
 
 import pandas as pd
@@ -617,11 +618,478 @@ def render_landing_page_v2():
         st.rerun()
 
 
+def render_landing_page_v3():
+    landing_df = load_data()
+    landing_kpis = calculate_kpis(landing_df)
+    year_min = int(landing_df["ano"].min())
+    year_max = int(landing_df["ano"].max())
+    sectors_count = landing_df["setor"].nunique()
+    attacks_count = landing_df["tipo_ataque"].nunique()
+    states_count = landing_df["uf"].nunique()
+
+    landing_html = dedent("""
+        <style>
+        :root {
+            color-scheme: dark;
+        }
+
+        .stApp {
+            background: #020617;
+            color: #f8fafc;
+        }
+
+        [data-testid="stHeader"],
+        [data-testid="stToolbar"],
+        [data-testid="stDecoration"],
+        [data-testid="stStatusWidget"] {
+            background: transparent;
+            color: #cbd5e1;
+        }
+
+        [data-testid="stSidebar"] {
+            display: none;
+        }
+
+        [data-testid="stMainBlockContainer"] {
+            max-width: 1120px;
+            padding: 0 1rem 4rem;
+        }
+
+        .landing-page {
+            display: grid;
+            gap: 32px;
+            padding-bottom: 34px;
+        }
+
+        .landing-hero {
+            min-height: 360px;
+            display: grid;
+            align-items: center;
+            justify-items: center;
+            text-align: center;
+            margin: 0 0 8px;
+            padding: 68px clamp(22px, 6vw, 92px);
+            background:
+                linear-gradient(135deg, rgba(2, 6, 23, 0.96), rgba(15, 118, 110, 0.88)),
+                linear-gradient(90deg, #020617, #0f766e);
+            border-bottom: 1px solid rgba(45, 212, 191, 0.22);
+        }
+
+        .landing-kicker {
+            margin: 0 0 14px;
+            color: #99f6e4;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0;
+            text-transform: uppercase;
+        }
+
+        .landing-title {
+            margin: 0;
+            color: #f8fafc;
+            font-size: clamp(2.7rem, 6vw, 5rem);
+            line-height: 1.03;
+            letter-spacing: 0;
+            max-width: 920px;
+        }
+
+        .landing-subtitle {
+            max-width: 820px;
+            margin: 18px auto 0;
+            color: #cbd5e1;
+            font-size: clamp(1.08rem, 2vw, 1.45rem);
+            line-height: 1.45;
+        }
+
+        .landing-meta-row {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 30px;
+            width: min(940px, 100%);
+        }
+
+        .landing-stat,
+        .landing-card,
+        .landing-mini-card {
+            background: #111827;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
+        }
+
+        .landing-stat {
+            padding: 16px;
+            text-align: left;
+            border-top: 3px solid #2dd4bf;
+        }
+
+        .landing-stat span {
+            display: block;
+            color: #94a3b8;
+            font-size: 0.86rem;
+            margin-bottom: 8px;
+        }
+
+        .landing-stat strong {
+            color: #f8fafc;
+            font-size: clamp(1.2rem, 2.3vw, 1.8rem);
+            line-height: 1.1;
+        }
+
+        .landing-card {
+            padding: clamp(22px, 4vw, 36px);
+        }
+
+        .landing-card h2 {
+            margin: 0 0 18px;
+            color: #5eead4;
+            font-size: clamp(1.55rem, 3vw, 2rem);
+            letter-spacing: 0;
+        }
+
+        .landing-card p,
+        .landing-card li {
+            color: #d1d5db;
+            font-size: 1.02rem;
+            line-height: 1.5;
+        }
+
+        .landing-card p:last-child {
+            margin-bottom: 0;
+        }
+
+        .landing-list {
+            margin: 0;
+            padding-left: 22px;
+        }
+
+        .landing-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .landing-mini-card {
+            padding: 18px 18px 18px 20px;
+            border-left: 5px solid #2dd4bf;
+            box-shadow: none;
+        }
+
+        .landing-mini-card strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #f8fafc;
+            font-size: 1.02rem;
+        }
+
+        .landing-mini-card span {
+            color: #cbd5e1;
+            line-height: 1.35;
+        }
+
+        .landing-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .landing-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 0 18px;
+            border-radius: 8px;
+            background: #0f766e;
+            border: 1px solid #2dd4bf;
+            color: #ffffff !important;
+            font-weight: 700;
+            text-decoration: none !important;
+        }
+
+        .landing-link.secondary {
+            background: #1e293b;
+            border-color: #475569;
+        }
+
+        .landing-credit {
+            display: grid;
+            gap: 6px;
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid #334155;
+        }
+
+        .landing-credit p {
+            margin: 0;
+            color: #cbd5e1;
+        }
+
+        .landing-credit strong {
+            color: #ffffff;
+        }
+
+        .landing-credit a {
+            color: #5eead4;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .stButton {
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .stButton > button {
+            width: 100%;
+            min-height: 58px;
+            padding: 0 28px;
+            border-radius: 8px;
+            border: 1px solid #2dd4bf;
+            background: #0f766e;
+            color: #ffffff;
+            font-size: 1.08rem;
+            font-weight: 700;
+            box-shadow: 0 16px 36px rgba(15, 118, 110, 0.28);
+            transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+        }
+
+        .stButton > button:hover {
+            transform: translateY(-1px);
+            background: #14b8a6;
+            border-color: #5eead4;
+            color: #02111b;
+        }
+
+        @media (max-width: 820px) {
+            .landing-meta-row,
+            .landing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .landing-hero {
+                min-height: 430px;
+            }
+        }
+        </style>
+
+        <div class="landing-page">
+            <section class="landing-hero">
+                <div>
+                    <p class="landing-kicker">Projeto final - Linguagens de Programação</p>
+                    <h1 class="landing-title">Análise de Segurança Cibernética e Ataques Digitais</h1>
+                    <p class="landing-subtitle">
+                        Dashboard executivo para investigar incidentes digitais no Brasil entre
+                        __YEAR_MIN__ e __YEAR_MAX__, com filtros, KPIs, gráficos e interpretação dos resultados.
+                    </p>
+                    <div class="landing-meta-row">
+                        <div class="landing-stat">
+                            <span>Total de incidentes</span>
+                            <strong>__TOTAL_INCIDENTS__</strong>
+                        </div>
+                        <div class="landing-stat">
+                            <span>Impacto financeiro</span>
+                            <strong>__TOTAL_IMPACT__</strong>
+                        </div>
+                        <div class="landing-stat">
+                            <span>Ataque predominante</span>
+                            <strong>__TOP_ATTACK__</strong>
+                        </div>
+                        <div class="landing-stat">
+                            <span>Setor mais afetado</span>
+                            <strong>__TOP_SECTOR__</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="landing-card">
+                <h2>Sobre o projeto</h2>
+                <p>
+                    Este projeto usa a base <strong>simulacao_ciberseguranca_brasil.csv</strong>
+                    para analisar incidentes de segurança digital, vulnerabilidades exploradas,
+                    criticidade, tempo de recuperação e impacto financeiro.
+                </p>
+                <p>
+                    A proposta é transformar uma base simulada em um produto analítico completo,
+                    com preparação dos dados, indicadores, visualizações interativas e uma leitura
+                    executiva para apoiar decisões de prevenção e resposta.
+                </p>
+                <div class="landing-credit">
+                    <p><strong>Unilasalle - Sistemas de Informação</strong></p>
+                    <p>Professor orientador: <a href="https://github.com/AlexandreLouzada" target="_blank">Alexandre Neves Louzada</a></p>
+                    <p>Aluno: <a href="https://github.com/ruancorreia" target="_blank">Ruan da Silva Correia</a></p>
+                </div>
+            </section>
+
+            <section class="landing-card">
+                <h2>Perguntas de negócio</h2>
+                <ul class="landing-list">
+                    <li>Quais tipos de ataque aparecem com maior frequência?</li>
+                    <li>Quais setores e estados concentram mais incidentes?</li>
+                    <li>Como o impacto financeiro varia por região, setor e criticidade?</li>
+                    <li>Há meses ou anos com maior concentração de ataques?</li>
+                    <li>Qual o tempo médio de recuperação dos incidentes analisados?</li>
+                    <li>Quais vulnerabilidades estão mais associadas aos ataques registrados?</li>
+                </ul>
+            </section>
+
+            <section class="landing-card">
+                <h2>Indicadores analisados</h2>
+                <div class="landing-grid">
+                    <div class="landing-mini-card">
+                        <strong>Incidentes totais</strong>
+                        <span>Volume de registros do recorte analisado.</span>
+                    </div>
+                    <div class="landing-mini-card">
+                        <strong>Impacto financeiro</strong>
+                        <span>Soma estimada dos prejuízos causados pelos ataques.</span>
+                    </div>
+                    <div class="landing-mini-card">
+                        <strong>Tempo de recuperação</strong>
+                        <span>Média de horas necessárias para restaurar operações.</span>
+                    </div>
+                    <div class="landing-mini-card">
+                        <strong>Criticidade e resposta</strong>
+                        <span>Distribuição por nível de risco e status de tratamento.</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="landing-card">
+                <h2>Escopo dos dados</h2>
+                <div class="landing-grid">
+                    <div class="landing-mini-card">
+                        <strong>__YEAR_MIN__ a __YEAR_MAX__</strong>
+                        <span>Período histórico da simulação analisada.</span>
+                    </div>
+                    <div class="landing-mini-card">
+                        <strong>__STATES_COUNT__ UFs</strong>
+                        <span>Estados brasileiros representados na base.</span>
+                    </div>
+                    <div class="landing-mini-card">
+                        <strong>__SECTORS_COUNT__ setores</strong>
+                        <span>Segmentos econômicos afetados por incidentes.</span>
+                    </div>
+                    <div class="landing-mini-card">
+                        <strong>__ATTACKS_COUNT__ tipos de ataque</strong>
+                        <span>Classes de ameaças comparadas no dashboard.</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="landing-card">
+                <h2>Tecnologias utilizadas</h2>
+                <div class="landing-grid">
+                    <div class="landing-mini-card"><strong>Python</strong><span>Tratamento, análise e lógica do projeto.</span></div>
+                    <div class="landing-mini-card"><strong>Pandas</strong><span>Leitura, limpeza e agregação dos dados.</span></div>
+                    <div class="landing-mini-card"><strong>Plotly</strong><span>Gráficos interativos e visualizações analíticas.</span></div>
+                    <div class="landing-mini-card"><strong>Streamlit</strong><span>Interface web e filtros do dashboard.</span></div>
+                </div>
+            </section>
+
+            <section class="landing-card">
+                <h2>Arquivos do projeto</h2>
+                <p>Acesse os principais componentes do projeto:</p>
+                <div class="landing-actions">
+                    <a class="landing-link" href="https://github.com/ruancorreia/projeto-ciberseguranca" target="_blank">Ver GitHub</a>
+                    <a class="landing-link secondary" href="__DATA_URL__" target="_blank">Base de dados</a>
+                    <a class="landing-link secondary" href="https://github.com/ruancorreia/projeto-ciberseguranca/blob/main/notebooks/analise_ciberseguranca.ipynb" target="_blank">Ver Notebook</a>
+                </div>
+            </section>
+
+            <section class="landing-card">
+                <h2>Dashboard interativo</h2>
+                <p>
+                    O painel principal permite explorar os dados por ano, mês, região, UF,
+                    setor, tipo de ataque e criticidade, combinando indicadores executivos
+                    com gráficos e tabela dinâmica.
+                </p>
+            </section>
+        </div>
+        """)
+
+    replacements = {
+        "__YEAR_MIN__": str(year_min),
+        "__YEAR_MAX__": str(year_max),
+        "__TOTAL_INCIDENTS__": format_integer(landing_kpis["total_incidentes"]),
+        "__TOTAL_IMPACT__": format_currency(landing_kpis["impacto_total"]),
+        "__TOP_ATTACK__": escape(landing_kpis["ataque_predominante"]),
+        "__TOP_SECTOR__": escape(landing_kpis["setor_mais_afetado"]),
+        "__STATES_COUNT__": str(states_count),
+        "__SECTORS_COUNT__": str(sectors_count),
+        "__ATTACKS_COUNT__": str(attacks_count),
+        "__DATA_URL__": DATA_URL,
+    }
+    for placeholder, value in replacements.items():
+        landing_html = landing_html.replace(placeholder, value)
+    landing_html = "\n".join(line.strip() for line in landing_html.splitlines())
+
+    st.markdown(landing_html, unsafe_allow_html=True)
+
+    go_to_dashboard = st.button(
+        "Acessar dashboard Streamlit",
+        type="primary",
+        use_container_width=True,
+    )
+
+    if go_to_dashboard:
+        st.session_state["show_dashboard"] = True
+        st.rerun()
+
+
+def handle_navigation_query():
+    if st.query_params.get("page") == "home":
+        st.session_state["show_dashboard"] = False
+        st.query_params.clear()
+
+
+def render_back_home_button():
+    st.markdown(
+        """
+        <style>
+        .back-home-link {
+            position: fixed;
+            left: 18px;
+            bottom: 18px;
+            z-index: 9999;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 18px;
+            border-radius: 8px;
+            border: 1px solid #2dd4bf;
+            background: #0f766e;
+            color: #ffffff !important;
+            font-weight: 700;
+            text-decoration: none !important;
+            box-shadow: 0 16px 36px rgba(15, 118, 110, 0.28);
+        }
+
+        .back-home-link:hover {
+            background: #14b8a6;
+            border-color: #5eead4;
+            color: #02111b !important;
+            text-decoration: none !important;
+        }
+        </style>
+        <a class="back-home-link" href="?page=home" target="_self">Voltar para início</a>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+handle_navigation_query()
+
 if not st.session_state.get("show_dashboard", False):
-    render_landing_page_v2()
+    render_landing_page_v3()
     st.stop()
 
 
+render_back_home_button()
 df = load_data()
 dark_mode = st.sidebar.toggle("Modo escuro", value=True)
 theme = configure_theme(dark_mode)
